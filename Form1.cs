@@ -62,6 +62,10 @@ namespace WinPsychTest
         public Form1()
         {
             InitializeComponent();
+
+            var authorizeUri = DropboxOAuth2Helper.GetAuthorizeUri(OAuthResponseType.Code, "XXXXXXXXXXXXXXX", (Uri)null);
+
+            Console.WriteLine(authorizeUri);
         }
 
         private void button1_Click(object sender, EventArgs e)
