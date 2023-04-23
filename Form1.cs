@@ -14,7 +14,7 @@ namespace WinPsychTest
 
     public partial class Form1 : Form
     {
-        int counter = 0;
+        Uri authorizeUri;
 
         async Task ListRootFolder(DropboxClient dbx)
         {
@@ -63,21 +63,19 @@ namespace WinPsychTest
         {
             InitializeComponent();
 
-            var authorizeUri = DropboxOAuth2Helper.GetAuthorizeUri(OAuthResponseType.Code, "XXXXXXXXXXXXXXX", (Uri)null);
+            authorizeUri = DropboxOAuth2Helper.GetAuthorizeUri(OAuthResponseType.Code, "XXXXXXXXXXXXXXX", (Uri)null);
 
             Console.WriteLine(authorizeUri);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            counter++;
-            textBox1.Text = counter.ToString();
 
             Task<string> task = Task.Run((Func<Task<string>>)Form1.Run);
             task.Wait();
 
-            textBox2.Text = task.GetAwaiter()
-                                .GetResult();
+            //textBox2.Text = task.GetAwaiter()
+            //                    .GetResult();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -88,6 +86,16 @@ namespace WinPsychTest
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(authorizeUri.ToString());
         }
     }
 }
