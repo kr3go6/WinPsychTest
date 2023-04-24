@@ -16,8 +16,8 @@ namespace WinPsychTest
     {
         Uri authorizeUri;
         public static string apiToken = "";
-        static readonly string appKey = "XXXXXXXXXXXXXXX";
-        static readonly string appSecret = "XXXXXXXXXXXXXXX";
+        static readonly string appKey = "XXX";
+        static readonly string appSecret = "XXX";
 
         static async Task<string> Login(string code)
         {
