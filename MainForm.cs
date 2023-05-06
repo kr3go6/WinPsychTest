@@ -9,7 +9,9 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SQLite;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Data.Common;
 
 namespace WinPsychTest
 {
@@ -70,6 +72,29 @@ namespace WinPsychTest
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            string baseName = "DownloadedFiles.db";
+
+            SQLiteConnection.CreateFile(baseName);
+
+            SQLiteFactory factory = (SQLiteFactory) DbProviderFactories.GetFactory("System.Data.SQLite");
+
+            using (SQLiteConnection connection = (SQLiteConnection)factory.CreateConnection())
+            {
+                connection.ConnectionString = "Data Source = " + baseName;
+                connection.Open();
+
+                using (SQLiteCommand command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = @"CREATE TABLE IF NOT EXISTS [files] (
+                    [id] integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    [name] char(100) NOT NULL,
+                    [path] char(100) NOT NULL
+                    );";
+                    command.CommandType = CommandType.Text;
+                    command.ExecuteNonQuery();
+                }
+            }
+
             apiToken = Form1.apiToken;
 
             Task<string> task = Task.Run(Run);
