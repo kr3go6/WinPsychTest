@@ -30,6 +30,7 @@
         {
             this.button1 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -55,17 +56,29 @@
             this.richTextBox1.Text = "";
             this.richTextBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.richTextBox1_MouseClick);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(109, 590);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(771, 32);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Нажмите на название файла, чтобы его просмотреть";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1182, 953);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.button1);
             this.Name = "MainForm";
             this.Text = "PsychTest";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -73,5 +86,6 @@
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Label label1;
     }
 }

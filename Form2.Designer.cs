@@ -60,9 +60,9 @@
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label2.Location = new System.Drawing.Point(12, 92);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(312, 22);
+            this.label2.Size = new System.Drawing.Size(150, 22);
             this.label2.TabIndex = 2;
-            this.label2.Text = "Размер экрана (ширина/высота)";
+            this.label2.Text = "Размер экрана";
             this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // textBox2
@@ -76,10 +76,12 @@
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(333, 13);
+            this.richTextBox1.Font = new System.Drawing.Font("Courier New", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.richTextBox1.Location = new System.Drawing.Point(260, 12);
             this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.ReadOnly = true;
             this.richTextBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.richTextBox1.Size = new System.Drawing.Size(837, 528);
+            this.richTextBox1.Size = new System.Drawing.Size(1110, 615);
             this.richTextBox1.TabIndex = 4;
             this.richTextBox1.Text = "";
             this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
@@ -88,14 +90,14 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1182, 553);
+            this.ClientSize = new System.Drawing.Size(1382, 659);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Name = "Form2";
-            this.Text = "Form2";
+            this.Text = "Просмотр результатов";
             this.ResumeLayout(false);
             this.PerformLayout();
 

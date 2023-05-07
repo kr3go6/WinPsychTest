@@ -41,7 +41,7 @@ namespace WinPsychTest
             }
         }
 
-        static async Task<Object> GetJsonContent(String path)
+        static async Task<dynamic> GetJsonContent(String path)
         {
             using (var dbx = new DropboxClient(apiToken))
             {
@@ -52,7 +52,7 @@ namespace WinPsychTest
                 var content = await response.GetContentAsByteArrayAsync();
 
                 // Decode byte string into JSON object
-                var json = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(content));
+                dynamic json = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(content));
 
                 return json;
             }
