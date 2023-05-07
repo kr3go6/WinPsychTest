@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Data.SQLite;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace WinPsychTest
 {
@@ -20,7 +21,7 @@ namespace WinPsychTest
         static string apiToken;
         private static List<string> files = new List<string>();
 
-        static async Task<string> Run()
+        static async Task<string> GetFilesList()
         {
             using (var dbx = new DropboxClient(apiToken))
             {
@@ -37,6 +38,23 @@ namespace WinPsychTest
                 }
 
                 return files_str;
+            }
+        }
+
+        static async Task<Object> GetJsonContent(String path)
+        {
+            using (var dbx = new DropboxClient(apiToken))
+            {
+                // Download file contents
+                var response = await dbx.Files.DownloadAsync(path);
+
+                // Read file contents as byte string
+                var content = await response.GetContentAsByteArrayAsync();
+
+                // Decode byte string into JSON object
+                var json = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(content));
+
+                return json;
             }
         }
 
@@ -72,7 +90,7 @@ namespace WinPsychTest
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            string baseName = "DownloadedFiles.db";
+            string baseName = "testResults.db";
 
             SQLiteConnection.CreateFile(baseName);
 
@@ -86,9 +104,10 @@ namespace WinPsychTest
                 using (SQLiteCommand command = new SQLiteCommand(connection))
                 {
                     command.CommandText = @"CREATE TABLE IF NOT EXISTS [files] (
-                    [id] integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-                    [name] char(100) NOT NULL,
-                    [path] char(100) NOT NULL
+                    [id] INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    [name] CHAR(100) NOT NULL,
+                    [time] DATETIME,
+                    [downloadPath] CHAR(100) NOT NULL
                     );";
                     command.CommandType = CommandType.Text;
                     command.ExecuteNonQuery();
@@ -97,7 +116,7 @@ namespace WinPsychTest
 
             apiToken = Form1.apiToken;
 
-            Task<string> task = Task.Run(Run);
+            Task<string> task = Task.Run(GetFilesList);
             task.Wait();
 
             richTextBox1.Text = task.GetAwaiter()
@@ -106,7 +125,7 @@ namespace WinPsychTest
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Task<string> task = Task.Run(Run);
+            Task<string> task = Task.Run(GetFilesList);
             task.Wait();
 
             richTextBox1.Text = task.GetAwaiter()
@@ -116,7 +135,18 @@ namespace WinPsychTest
         private void richTextBox1_MouseClick(object sender, MouseEventArgs e)
         {
             string word = getWordAtIndex(richTextBox1, richTextBox1.SelectionStart);
-            if (files.Contains(word)) MessageBox.Show(word);
+            
+            if (files.Contains(word))
+            {
+                Task<Object> task = Task.Run(() => GetJsonContent("/data/data/com.example.testapplication/cache/" + word));
+                task.Wait();
+
+                var jsonData = task.GetAwaiter().GetResult();
+
+                var formPopup = new Form2();
+                formPopup.UpdateTextFromJson(jsonData);
+                formPopup.Show(this);
+            }
         }
     }
 }
