@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,6 +15,8 @@ namespace WinPsychTest
 
     public partial class Form1 : Form
     {
+        Thread newTh;
+
         Uri authorizeUri;
         public static string apiToken = "";
         static readonly string appKey = "XXX";
@@ -50,9 +53,15 @@ namespace WinPsychTest
             apiToken = task.GetAwaiter()
                                 .GetResult();
 
-            Form form2 = new MainForm();
-            this.Hide();
-            form2.ShowDialog();
+            this.Close();
+            newTh = new Thread(openMainForm);
+            newTh.SetApartmentState(ApartmentState.STA);
+            newTh.Start();
+        }
+
+        private void openMainForm()
+        {
+            Application.Run(new MainForm());
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
