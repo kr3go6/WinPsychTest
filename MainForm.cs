@@ -13,6 +13,7 @@ using System.Data.SQLite;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Data.Common;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WinPsychTest
 {
@@ -56,6 +57,27 @@ namespace WinPsychTest
 
                 return json;
             }
+        }
+
+        static async Task<string> PrettyPrinter(dynamic jsonData)
+        {
+            String res = "успех |  id |  цвет | радиус | центр круга | касание\n";
+
+            for (int i = 0; i < ((JArray)jsonData.touch_data).Count; i++)
+            {
+                res += String.Format("{0,5} |{1,4} | {2,5} |{3,7} | ({4,4},{5,4}) | ({6,4},{7,4}) \n",
+                    ((bool)jsonData.touch_data[i].is_successful) ? "✔" : "X",
+                    jsonData.touch_data[i].id.ToString(),
+                    jsonData.touch_data[i].color,
+                    jsonData.touch_data[i].button_radius,
+                    jsonData.touch_data[i].x_button_center,
+                    jsonData.touch_data[i].y_button_center,
+                    jsonData.touch_data[i].x,
+                    jsonData.touch_data[i].y
+                    );
+            }
+
+            return res;
         }
 
         public MainForm()
@@ -138,14 +160,19 @@ namespace WinPsychTest
             
             if (files.Contains(word))
             {
+                var formPopup = new Form2();
+                formPopup.Show(this);
+
                 Task<Object> task = Task.Run(() => GetJsonContent("/data/data/com.example.testapplication/cache/" + word));
                 task.Wait();
-
                 var jsonData = task.GetAwaiter().GetResult();
 
-                var formPopup = new Form2();
+                Task<String> prettyTask = Task.Run(() => PrettyPrinter(jsonData));
+
                 formPopup.UpdateTextFromJson(jsonData);
-                formPopup.Show(this);
+
+                prettyTask.Wait();
+                formPopup.UpdateTextFromJson(prettyTask.GetAwaiter().GetResult());
             }
         }
     }
