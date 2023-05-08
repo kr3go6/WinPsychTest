@@ -71,7 +71,7 @@ namespace WinPsychTest
                     using (var command = new SQLiteCommand("INSERT INTO files (name, url_path) VALUES (@value1, @value2)", connection))
                     {
                         command.Parameters.AddWithValue("@value1", item.Key);
-                        command.Parameters.AddWithValue("@value2", item.Value);
+                        command.Parameters.AddWithValue("@value2", "/data/data/com.example.testapplication/cache/" + item.Value);
                         command.ExecuteNonQuery();
                     }
                 }
@@ -93,10 +93,10 @@ namespace WinPsychTest
                 {
                     if (item.Name.LastIndexOf("_") != -1)
                     {
-                        files_str += string.Format("{0,19} {1}\r\n", item.AsFile.ClientModified.ToString(),
+                        files_str += string.Format("{0,19}      {1}\r\n", item.AsFile.ClientModified.ToString(),
                             item.Name.Substring(0, item.Name.LastIndexOf("_")));
                         files.Add(item.Name);
-                        prettyFiles.Add(String.Format("{0,19} {1}", item.AsFile.ClientModified.ToString(), 
+                        prettyFiles.Add(String.Format("{0,19}      {1}", item.AsFile.ClientModified.ToString(), 
                             item.Name.Substring(0, item.Name.LastIndexOf("_"))));
                     }
                 }
@@ -240,7 +240,7 @@ namespace WinPsychTest
                 var formPopup = new Form2();
                 formPopup.Show(this);
 
-                Task<Object> task = Task.Run(() => GetJsonContent("/data/data/com.example.testapplication/cache/" + url));
+                Task<Object> task = Task.Run(() => GetJsonContent(url));
                 task.Wait();
                 var jsonData = task.GetAwaiter().GetResult();
 
