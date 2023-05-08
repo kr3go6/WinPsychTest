@@ -21,12 +21,69 @@ namespace WinPsychTest
     {
         static string apiToken;
         private static List<string> files = new List<string>();
+        private static List<string> prettyFiles = new List<string>();
+        SQLiteFactory factory;
+        string baseName = "testResults.db";
+
+        void UpdateDB()
+        {
+            Task<string> task = Task.Run(GetFilesList);
+            task.Wait();
+
+            richTextBox1.Text = task.GetAwaiter()
+                                .GetResult();
+
+            List<KeyValuePair<string, String>> notAddedYet = new List<KeyValuePair<String, String>>();
+
+            int i = 0;
+
+            foreach (var item in prettyFiles)
+            {
+                using (SQLiteConnection connection = (SQLiteConnection)factory.CreateConnection())
+                {
+                    connection.ConnectionString = "Data Source = " + baseName;
+                    connection.Open();
+
+                    using (SQLiteCommand command = new SQLiteCommand(connection))
+                    {
+                        command.CommandText = "SELECT id FROM files WHERE name == \"" + item + "\";";
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (!reader.Read())
+                            {
+                                notAddedYet.Add(new KeyValuePair<string, string>(item, files[i]));
+                            }
+
+                            i += 1;
+                        }
+                    }
+                }
+            }
+
+            using (SQLiteConnection connection = (SQLiteConnection)factory.CreateConnection())
+            {
+                connection.ConnectionString = "Data Source = " + baseName;
+                connection.Open();
+
+                foreach (var item in notAddedYet)
+                {
+                    using (var command = new SQLiteCommand("INSERT INTO files (name, url_path) VALUES (@value1, @value2)", connection))
+                    {
+                        command.Parameters.AddWithValue("@value1", item.Key);
+                        command.Parameters.AddWithValue("@value2", item.Value);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
 
         static async Task<string> GetFilesList()
         {
             using (var dbx = new DropboxClient(apiToken))
             {
                 files.Clear();
+                prettyFiles.Clear();
                 var folder = "/data/data/com.example.testapplication/cache";
                 var list = await dbx.Files.ListFolderAsync(folder);
 
@@ -34,8 +91,14 @@ namespace WinPsychTest
 
                 foreach (var item in list.Entries.Reverse().Where(i => i.IsFile))
                 {
-                    files_str += string.Format("{0,19}   {1}\r\n", item.AsFile.ClientModified.ToString(), item.Name);
-                    files.Add(item.Name);
+                    if (item.Name.LastIndexOf("_") != -1)
+                    {
+                        files_str += string.Format("{0,19} {1}\r\n", item.AsFile.ClientModified.ToString(),
+                            item.Name.Substring(0, item.Name.LastIndexOf("_")));
+                        files.Add(item.Name);
+                        prettyFiles.Add(String.Format("{0,19} {1}", item.AsFile.ClientModified.ToString(), 
+                            item.Name.Substring(0, item.Name.LastIndexOf("_"))));
+                    }
                 }
 
                 return files_str;
@@ -59,7 +122,7 @@ namespace WinPsychTest
             }
         }
 
-        static async Task<string> PrettyPrinter(dynamic jsonData)
+        static string PrettyPrinter(dynamic jsonData)
         {
             String res = "успех |  id |  цвет | радиус | центр круга | касание\n";
 
@@ -87,11 +150,12 @@ namespace WinPsychTest
 
         string getWordAtIndex(RichTextBox RTB, int index)
         {
-            string wordSeparators = " \r\n";
+            string wordSeparators = "\r\n";
+            int c = index;
             int cp0 = index;
             int cp2 = RTB.Find(wordSeparators.ToCharArray(), index);
 
-            for (int c = index; c > 0; c--)
+            for (; c > 0; c--)
             { 
                 try
                 {
@@ -106,17 +170,17 @@ namespace WinPsychTest
                 }
             }
 
+            if (c == 0) cp0 = c;
+
             int l = cp2 - cp0;
             if (l > 0) return RTB.Text.Substring(cp0, l); else return "";
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            string baseName = "testResults.db";
-
             SQLiteConnection.CreateFile(baseName);
 
-            SQLiteFactory factory = (SQLiteFactory) DbProviderFactories.GetFactory("System.Data.SQLite");
+            factory = (SQLiteFactory) DbProviderFactories.GetFactory("System.Data.SQLite");
 
             using (SQLiteConnection connection = (SQLiteConnection)factory.CreateConnection())
             {
@@ -128,8 +192,7 @@ namespace WinPsychTest
                     command.CommandText = @"CREATE TABLE IF NOT EXISTS [files] (
                     [id] INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                     [name] CHAR(100) NOT NULL,
-                    [time] DATETIME,
-                    [downloadPath] CHAR(100) NOT NULL
+                    [url_path] CHAR(100) NOT NULL
                     );";
                     command.CommandType = CommandType.Text;
                     command.ExecuteNonQuery();
@@ -138,32 +201,46 @@ namespace WinPsychTest
 
             apiToken = Form1.apiToken;
 
-            Task<string> task = Task.Run(GetFilesList);
-            task.Wait();
-
-            richTextBox1.Text = task.GetAwaiter()
-                                .GetResult();
+            UpdateDB();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Task<string> task = Task.Run(GetFilesList);
-            task.Wait();
-
-            richTextBox1.Text = task.GetAwaiter()
-                                .GetResult();
+            UpdateDB();
         }
 
         private void richTextBox1_MouseClick(object sender, MouseEventArgs e)
         {
             string word = getWordAtIndex(richTextBox1, richTextBox1.SelectionStart);
+
+            Console.WriteLine(word);
             
-            if (files.Contains(word))
+            if (prettyFiles.Contains(word))
             {
+                string url;
+
+                using (SQLiteConnection connection = (SQLiteConnection)factory.CreateConnection())
+                {
+                    connection.ConnectionString = "Data Source = " + baseName;
+                    connection.Open();
+
+                    using (SQLiteCommand command = new SQLiteCommand(connection))
+                    {
+                        command.CommandText = "SELECT url_path FROM files WHERE name == \"" + word + "\";";
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            reader.Read();
+
+                            url = reader.GetString(0);
+                        }
+                    }
+                }
+
                 var formPopup = new Form2();
                 formPopup.Show(this);
 
-                Task<Object> task = Task.Run(() => GetJsonContent("/data/data/com.example.testapplication/cache/" + word));
+                Task<Object> task = Task.Run(() => GetJsonContent("/data/data/com.example.testapplication/cache/" + url));
                 task.Wait();
                 var jsonData = task.GetAwaiter().GetResult();
 

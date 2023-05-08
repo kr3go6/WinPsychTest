@@ -83,5 +83,10 @@ namespace WinPsychTest
         {
             System.Diagnostics.Process.Start(authorizeUri.ToString());
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
