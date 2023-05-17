@@ -19,7 +19,11 @@ namespace WinPsychTest
 {
     public partial class MainForm : Form
     {
-        static string apiToken;
+        public static string apiToken = "";
+        static readonly string appKey = "XXX";
+        static readonly string appSecret = "XXX";
+        static readonly string refreshToken = "XXX";
+
         private static List<string> files = new List<string>();
         private static List<string> prettyFiles = new List<string>();
         SQLiteFactory factory;
@@ -80,7 +84,9 @@ namespace WinPsychTest
 
         static async Task<string> GetFilesList()
         {
-            using (var dbx = new DropboxClient(apiToken))
+            var config = new DropboxClientConfig("Psychological_Tests_Android_App_(0.01)");
+
+            using (var dbx = new DropboxClient(null, refreshToken, appKey, appSecret, config))
             {
                 files.Clear();
                 prettyFiles.Clear();
@@ -107,7 +113,9 @@ namespace WinPsychTest
 
         static async Task<dynamic> GetJsonContent(String path)
         {
-            using (var dbx = new DropboxClient(apiToken))
+            var config = new DropboxClientConfig("Psychological_Tests_Android_App_(0.01)");
+
+            using (var dbx = new DropboxClient(null, refreshToken, appKey, appSecret, config))
             {
                 // Download file contents
                 var response = await dbx.Files.DownloadAsync(path);
@@ -198,8 +206,6 @@ namespace WinPsychTest
                     command.ExecuteNonQuery();
                 }
             }
-
-            apiToken = Form1.apiToken;
 
             UpdateDB();
         }
